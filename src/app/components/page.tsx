@@ -9,6 +9,7 @@ import {
   Plus,
   Shield,
 } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React from 'react';
 
 import Button from '@/components/buttons/Button';
@@ -30,6 +31,11 @@ export default function ComponentPage() {
   function toggleMode() {
     return mode === 'dark' ? setMode('light') : setMode('dark');
   }
+  const router = useRouter();
+
+  const navigateToLayout = () => {
+    router.push('/your-layout-route');
+  };
 
   const textColor = mode === 'dark' ? 'text-gray-300' : 'text-gray-600';
 
@@ -41,7 +47,7 @@ export default function ComponentPage() {
         <div
           className={clsx(
             'layout min-h-screen py-20',
-            mode === 'dark' ? 'text-white' : 'text-black'
+            mode === 'dark' ? 'text-white' : 'text-black',
           )}
         >
           <h1>Built-in Components</h1>
@@ -76,7 +82,7 @@ export default function ComponentPage() {
                     mode === 'dark'
                       ? 'bg-dark border border-gray-600'
                       : 'border-gray-300 bg-white',
-                    'focus:border-primary-400 focus:ring-primary-400 focus:outline-none focus:ring'
+                    'focus:border-primary-400 focus:ring-primary-400 focus:outline-none focus:ring',
                   )}
                   onChange={(e) => setColor(e.target.value as Color)}
                 >
@@ -356,6 +362,7 @@ export default function ComponentPage() {
                 <Button disabled variant='light'>
                   Disabled
                 </Button>
+                <Button disabled variant='light'></Button>
               </div>
               <div className='flex flex-wrap gap-2'>
                 <Button isLoading variant='primary'>
