@@ -1,5 +1,3 @@
-// /Users/xiabai/p/src/pages/api/gpt4.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 
@@ -16,11 +14,12 @@ export default async function handler(
   }
 
   try {
-    const { message } = req.body;
+    const { messages } = req.body; // Expecting an array of messages
+    console.log('Messages received by API:', messages); // Debugging
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
-      messages: [{ role: 'user', content: message }],
+      messages: messages,
     });
 
     res.status(200).json({ response: response.choices[0].message.content });
