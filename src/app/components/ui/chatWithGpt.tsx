@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { Button } from './button';
-import { Textarea } from './input';
+import { Textarea } from './text';
 
 function ChatWithGPT() {
   const [messages, setMessages] = useState<{ role: string; content: any }[]>(
