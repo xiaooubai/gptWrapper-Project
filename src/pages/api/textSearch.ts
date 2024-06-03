@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const GOOGLE_PLACES_API_ENDPOINT =
   'https://places.googleapis.com/v1/places:searchText';
 const GOOGLE_PLACES_API_KEY = 'AIzaSyAx-dM2RiFz9rCIexmVm88gzBo7CaU62sw';
-const pageSize = 1;
+const pageSize = 3;
 
 const fetchPlaces = async (textQuery: string): Promise<any> => {
   try {
@@ -26,7 +26,8 @@ const fetchPlaces = async (textQuery: string): Promise<any> => {
     const headers = {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.location',
+      'X-Goog-FieldMask':
+        'places.id,places.displayName,places.primaryTypeDisplayName,places.location,places.priceLevel,places.reservable,places.websiteUri,places.nationalPhoneNumber',
     };
 
     console.log('Request Headers:', headers);

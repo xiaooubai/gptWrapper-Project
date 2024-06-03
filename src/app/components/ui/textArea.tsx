@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Maps from '@/app/components/maps';
 import EventDetailsForm from '@/app/components/ui/eventForm';
@@ -20,36 +20,78 @@ interface Photo {
 }
 
 interface Message {
-  role: 'user' | 'bot' | 'system'; // 'system' for special messages like forms
-  content: string | JSX.Element; // Allow content to be a string or JSX.Element
+  role: 'user' | 'bot' | 'system';
+  content: string | JSX.Element;
 }
 
 export function TextareaWithButton() {
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [input, setInput] = useState('');
-
   const handleFormSubmit = (placesData: Place[]) => {
-    setPlaces(placesData);
-    setMessages((messages) => [
-      ...messages,
+    setItems((items) => [
+      ...items,
       {
         role: 'bot',
         content: 'Here are some places that match your criteria:',
       },
+      ...placesData,
     ]);
   };
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [items, setItems] = useState<(Message | Place)[]>([
     {
       role: 'system',
       content: <EventDetailsForm onFormSubmit={handleFormSubmit} />,
     },
   ]);
+  const [input, setInput] = useState('');
+  const [apiMessages, setApiMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    const initialMessage =
+      "We're talking writing a modern Canadian version of the Romance of the Three Kingdoms as a graphic novel";
+    const initialApiMessage: Message = {
+      role: 'user',
+      content: initialMessage,
+    };
+    setApiMessages([initialApiMessage]);
+
+    const sendInitialMessage = async () => {
+      const requestBody = {
+        messages: [initialApiMessage],
+      };
+      console.log('Request body:', JSON.stringify(requestBody)); // Debugging
+
+      try {
+        const response = await fetch('/api/gpt4', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        // Debugging
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+        }
+
+        // No need to handle response, we're only setting context
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    sendInitialMessage();
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    setMessages((messages) => [...messages, { role: 'user', content: input }]);
+    const newMessage: Message = { role: 'user', content: input };
+    const updatedApiMessages = [...apiMessages, newMessage];
+
+    setApiMessages(updatedApiMessages);
+    setItems([...items, newMessage]);
     setInput('');
 
     try {
@@ -58,19 +100,21 @@ export function TextareaWithButton() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({
+          messages: updatedApiMessages
+            .filter((msg) => typeof msg.content === 'string') // Filter out non-string content
+            .map((msg) => ({
+              role: msg.role,
+              content: msg.content as string, // Type assertion to ensure content is string
+            })),
+        }),
       });
 
-      const { response: botMessage, places: fetchedPlaces } =
-        await response.json();
+      const data = await response.json();
+      const botMessage: Message = { role: 'bot', content: data.response };
 
-      setMessages((messages) => [
-        ...messages,
-        { role: 'bot', content: botMessage }, // Ensure role is 'bot'
-      ]);
-      if (fetchedPlaces) {
-        setPlaces(fetchedPlaces); // Update places state with fetched data
-      }
+      setApiMessages((apiMessages) => [...apiMessages, botMessage]);
+      setItems((items) => [...items, botMessage]);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -79,20 +123,23 @@ export function TextareaWithButton() {
   return (
     <div className='flex flex-col h-full bg-white'>
       <div className='flex-1 overflow-y-auto p-4 space-y-2'>
-        {messages.map((msg, index) =>
-          msg.role === 'system' ? (
-            <div key={index}>{msg.content}</div>
-          ) : (
-            <Message
-              key={index}
-              role={msg.role}
-              content={msg.content as string}
-            />
-          ),
-        )}
-        {places.map((place, index) => (
-          <Maps key={index} place={place} />
-        ))}
+        {items.map((item, index) => {
+          if ('role' in item) {
+            // Render message
+            return item.role === 'system' ? (
+              <div key={index}>{item.content}</div>
+            ) : (
+              <Message
+                key={index}
+                role={item.role}
+                content={item.content as string}
+              />
+            );
+          } else {
+            // Render place map
+            return <Maps key={index} place={item} />;
+          }
+        })}
       </div>
       <div className='p-2 border-t border-gray-300'>
         <Textarea
