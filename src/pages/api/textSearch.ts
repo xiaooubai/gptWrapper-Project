@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const GOOGLE_PLACES_API_ENDPOINT =
   'https://places.googleapis.com/v1/places:searchText';
-const GOOGLE_PLACES_API_KEY = 'AIzaSyAx-dM2RiFz9rCIexmVm88gzBo7CaU62sw';
+const GOOGLE_PLACES_API_KEY = '';
 const pageSize = 3;
 
 const fetchPlaces = async (textQuery: string): Promise<any> => {
