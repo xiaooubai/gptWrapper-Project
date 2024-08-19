@@ -15,7 +15,7 @@ export default async function handler(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer ROVqytJbEhjsJmxcZVnOn4OrMfAyoh9L', // Securely use the API key
+            Authorization: 'Bearer', // Securely use the API key
           },
           body: JSON.stringify({
             model: 'mistral-large-latest',
